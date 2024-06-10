@@ -1,0 +1,15 @@
+# Question number 5
+
+import nltk
+from nltk.stem import PorterStemmer
+
+porter = PorterStemmer()
+
+user_input = input("Enter a list of words separated by spaces: ")
+
+words = nltk.word_tokenize(user_input)
+
+stemmed_words = [porter.stem(word) for word in words]
+
+for original, stemmed in zip(words, stemmed_words):
+    print(f"{original} -> {stemmed}")
