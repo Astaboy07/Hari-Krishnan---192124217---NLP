@@ -1,0 +1,31 @@
+#Question no 3
+
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+
+nltk.download('punkt')
+nltk.download('wordnet')
+nltk.download('averaged_perceptron_tagger')
+
+def morphological_analysis(text):
+    words = word_tokenize(text)
+    
+    lemmatizer = WordNetLemmatizer()
+    
+    analysis = []
+    for word in words:
+        lemma = lemmatizer.lemmatize(word)
+        
+        analysis.append((word, lemma))
+    
+    return analysis
+
+user_input = input("Enter a sentence for morphological analysis: ")
+
+analysis_result = morphological_analysis(user_input)
+
+print("Original Word\tLemma")
+print("-------------------------")
+for original_word, lemma in analysis_result:
+    print(f"{original_word}\t\t{lemma}")
