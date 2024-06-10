@@ -1,0 +1,50 @@
+class PluralFiniteStateMachine:
+    def __init__(self):
+        self.states = {'S0', 'S1', 'S2', 'S3','S4'}
+        
+        self.start_state = 'S0'
+        
+        self.accepting_state = 'S4'
+        
+        self.transitions = {
+            ('S0', 'vowel'): 'S1',
+            ('S0', 'consonant'): 'S2',
+            ('S1', 'consonant'): 'S4',
+            ('S1', 'vowel'): 'S4',
+            ('S2', 'consonant'): 'S4',
+            ('S2', 'vowel'): 'S4'd,
+        }
+    
+    def process_word(self, word):
+        current_state = self.start_state
+        
+        if word[0].lower() in ['a', 'e', 'i', 'o', 'u']:
+            input_type = 'vowel'
+        else:
+            input_type = 'consonant'
+        
+        for char in word[1:]:
+            if (current_state, input_type) in self.transitions:
+                current_state = self.transitions[(current_state, input_type)]
+            else:
+                return word
+        
+        if current_state == self.accepting_state:
+            if word[-1] == 'y':
+                return word[:-1] + 'ies'
+            elif word[-1] in ['s', 'x', 'z', 'ch', 'sh']:
+                return word + 'es'
+            else:
+                return word + 's'
+        else:
+            return word
+
+fsm = PluralFiniteStateMachine()
+
+while True:
+    user_input = input("Enter a word to pluralize (or type 'exit' to quit): ")
+    if user_input.lower() == 'exit':
+        break
+    
+    plural_form = fsm.process_word(user_input)
+    print(f"The plural of '{user_input}' is '{plural_form}'")
