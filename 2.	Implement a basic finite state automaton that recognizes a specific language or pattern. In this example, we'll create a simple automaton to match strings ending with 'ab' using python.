@@ -1,0 +1,36 @@
+#Question no 2
+
+class FiniteStateAutomaton:
+    def __init__(self):
+        self.states = {'q0', 'q1', 'q2'}
+        self.start_state = 'q0'
+        self.accepting_states = {'q2'}
+        self.transitions = {
+            ('q0', 'a'): 'q1',
+            ('q1', 'b'): 'q2',
+            ('q0', 'b'): 'q0', 
+            ('q1', 'a'): 'q1', 
+            ('q2', 'a'): 'q1', 
+            ('q2', 'b'): 'q0', 
+        }
+    
+    def process_string(self, input_string):
+        current_state = self.start_state
+        
+        for char in input_string:
+            if (current_state, char) in self.transitions:
+                current_state = self.transitions[(current_state, char)]
+            else:
+                return False
+        
+        return current_state in self.accepting_states
+
+fsa = FiniteStateAutomaton()
+
+while True:
+    user_input = input("Enter a string to test (or type 'exit' to quit): ")
+    if user_input.lower() == '0':
+        break
+    
+    result = fsa.process_string(user_input)
+    print(f"The string '{user_input}' is {'accepted' if result else 'not accepted'} by the FSA.")
