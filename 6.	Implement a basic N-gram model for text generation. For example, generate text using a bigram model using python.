@@ -1,0 +1,48 @@
+#Question no 6
+
+import nltk
+from nltk.tokenize import word_tokenize
+from collections import defaultdict, Counter
+import random
+
+nltk.download('punkt')
+
+def preprocess_text(text):
+    tokens = word_tokenize(text.lower())
+    return tokens
+
+def build_bigram_model(tokens):
+    bigrams = list(nltk.bigrams(tokens))
+    model = defaultdict(Counter)
+    for w1, w2 in bigrams:
+        model[w1][w2] += 1
+    return model
+
+def generate_text(model, start_word, num_words=20):
+    current_word = start_word
+    output = [current_word]
+    for _ in range(num_words - 1):
+        next_words = list(model[current_word].keys())
+        if next_words:
+            next_word = random.choices(next_words, weights=model[current_word].values())[0]
+            output.append(next_word)
+            current_word = next_word
+        else:
+            break
+    return ' '.join(output)
+
+# Get input text from the user
+user_text = input("Enter text to build the bigram model: ")
+
+# Preprocess the text
+tokens = preprocess_text(user_text)
+
+# Build the bigram model
+bigram_model = build_bigram_model(tokens)
+
+# Get the start word from the user
+start_word = input("Enter the start word for text generation: ").lower()
+
+# Generate text using the bigram model
+generated_text = generate_text(bigram_model, start_word)
+print("Generated text: ", generated_text)
