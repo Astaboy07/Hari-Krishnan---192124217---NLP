@@ -1,0 +1,27 @@
+#Question no 9
+
+import re
+
+def rule_based_pos_tag(sentence):
+    tagged_sentence = []
+    for word in sentence.split():
+        if re.match(r'\b(?:is|am|are|was|were)\b', word, re.IGNORECASE):
+            tagged_sentence.append((word, 'VERB'))
+        elif re.match(r'\b(?:a|an|the)\b', word, re.IGNORECASE):
+            tagged_sentence.append((word, 'DET'))
+        elif re.match(r'\b(?:quick|brown|lazy)\b', word, re.IGNORECASE):
+            tagged_sentence.append((word, 'ADJ'))
+        elif re.match(r'\b(?:fox|dog)\b', word, re.IGNORECASE):
+            tagged_sentence.append((word, 'NOUN'))
+        elif re.match(r'\b(?:over)\b', word, re.IGNORECASE):
+            tagged_sentence.append((word, 'ADP'))
+        else:
+            tagged_sentence.append((word, 'UNKNOWN'))
+    return tagged_sentence
+
+# Sample sentence to tag
+sentence = "The quick brown fox jumps over the lazy dog."
+
+# Tagging the sentence
+tagged_sentence = rule_based_pos_tag(sentence)
+print(tagged_sentence)
