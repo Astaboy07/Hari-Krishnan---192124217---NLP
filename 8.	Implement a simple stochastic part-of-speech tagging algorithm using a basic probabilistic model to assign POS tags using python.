@@ -1,0 +1,73 @@
+!pip install nltk  # Install NLTK library (one-time installation)
+
+from nltk.corpus import brown
+
+# Download the Brown corpus (one-time download)
+nltk.download('brown')
+
+# Define a function to train the model on tagged sentences
+def train(sentences):
+  """
+  This function trains the model by calculating word-tag probabilities from a list of tagged sentences.
+
+  Args:
+      sentences: A list of lists, where each inner list represents a tagged sentence (word, tag) pairs.
+  """
+  word_tag_probs = {}
+  for sentence in sentences:
+    # Option 1: Access words and tags using indexing
+    # for word in sentence[0], tag in sentence[1]:  # Assuming word at index 0, tag at index 1
+    #   # Update probabilities here
+
+    # Option 2: Use zip function to unpack sentences
+    for word, tag in zip(*sentences):  # Unpack sentences into separate lists of words and tags
+      # Check if the word has been seen before
+      if word not in word_tag_probs:
+        word_tag_probs[word] = {}
+      # Update the probability for the current tag
+      word_tag_probs[word][tag] = word_tag_probs[word].get(tag, 0) + 1
+
+  # Normalize probabilities for each word (sum to 1)
+  for word, tag_probs in word_tag_probs.items():
+    total_count = sum(tag_probs.values())
+    for tag, count in tag_probs.items():
+      word_tag_probs[word][tag] /= total_count
+  return word_tag_probs
+
+# Define a function to predict the most likely POS tag for a word
+def predict(word, word_tag_probs):
+  """
+  This function predicts the most likely POS tag for a given word based on the trained probabilities.
+
+  Args:
+      word: The word for which to predict the POS tag.
+      word_tag_probs: The dictionary containing word-tag probabilities.
+
+  Returns:
+      The most likely POS tag for the word.
+  """
+  # Check if the word exists in the model
+  if word not in word_tag_probs:
+    # Assign a default tag (e.g., noun)
+    return "NN"
+
+  # Find the tag with the highest probability
+  most_likely_tag = max(word_tag_probs[word], key=word_tag_probs[word].get)
+  return most_likely_tag
+
+# Load the Brown corpus (already downloaded)
+brown_sents = brown.sents()  # Get sentences from Brown corpus
+
+# Train the model on the Brown corpus sentences
+word_tag_probs = train(brown_sents)
+
+# Example usage
+text = "The quick brown fox jumps over the lazy dog"
+words = text.split()
+
+# Predict POS tags for each word
+tags = [predict(word, word_tag_probs) for word in words]
+
+# Print the original sentence and predicted tags
+print(f"Original sentence: {text}")
+print(f"Predicted POS tags: {' '.join(tags)}")
