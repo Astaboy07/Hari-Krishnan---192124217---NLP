@@ -1,0 +1,45 @@
+#Question no 11
+
+class Parser:
+    def __init__(self, grammar, start_symbol):
+        self.grammar = grammar
+        self.start_symbol = start_symbol
+        self.input = ""
+        self.position = 0
+
+    def parse(self, input_string):
+        self.input = input_string
+        self.position = 0
+        return self._parse_symbol(self.start_symbol)
+
+    def _parse_symbol(self, symbol):
+        if symbol not in self.grammar:
+            # If the symbol is a terminal, match it against the current position in the input
+            if self.position < len(self.input) and self.input[self.position] == symbol:
+                self.position += 1
+                return True
+            else:
+                return False
+        else:
+            # Try each production for the symbol
+            for production in self.grammar[symbol]:
+                initial_position = self.position
+                if all(self._parse_symbol(sym) for sym in production):
+                    return True
+                # If the production didn't match, backtrack
+                self.position = initial_position
+            return False
+
+# Define the grammar
+grammar = {
+    'S': [['a', 'S', 'b'], ['']]
+}
+
+# Create a parser for the grammar with 'S' as the start symbol
+parser = Parser(grammar, 'S')
+
+# Test the parser with some strings
+test_strings = ["ab", "aabb", "aaabbb", "aab", "aabbb","S"]
+results = {s: parser.parse(s) for s in test_strings}
+
+results
