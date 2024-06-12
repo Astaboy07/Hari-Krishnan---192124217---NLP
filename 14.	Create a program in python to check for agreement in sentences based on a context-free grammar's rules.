@@ -1,0 +1,74 @@
+#Question no 14
+!pip install nltk
+import nltk
+from nltk import CFG
+
+# Define the context-free grammar with subject-verb agreement rules
+cfg = CFG.fromstring("""
+    S -> NP VP
+    NP -> Det N | Det Adj N | Pro
+    VP -> V NP | V
+    Det -> "the" | "a"
+    N -> "man" | "dog" | "cat" | "telescope" | "park"
+    Adj -> "big" | "small" | "green"
+    Pro -> "he" | "she" | "it" | "they"
+    V -> "sees" | "saw" | "walks" | "walk"
+    
+    # Singular and plural agreement
+    Pro[SG] -> "he" | "she" | "it"
+    Pro[PL] -> "they"
+    V[SG] -> "sees" | "walks"
+    V[PL] -> "walk"
+""")
+
+# Function to check agreement
+def check_agreement(sentence):
+    words = sentence.split()
+    parser = nltk.ChartParser(cfg)
+
+    for tree in parser.parse(words):
+        for subtree in tree.subtrees():
+            if subtree.label() == 'S':
+                np, vp = None, None
+                for child in subtree:
+                    if child.label() == 'NP':
+                        np = child
+                    elif child.label() == 'VP':
+                        vp = child
+                
+                # Find the pronoun and verb
+                pronoun = None
+                verb = None
+                for sub_np in np.subtrees():
+                    if sub_np.label() == 'Pro':
+                        pronoun = sub_np[0]
+                        break
+                
+                for sub_vp in vp.subtrees():
+                    if sub_vp.label().startswith('V'):
+                        verb = sub_vp[0]
+                        break
+                
+                # Check agreement
+                if pronoun and verb:
+                    pronoun_agreement = "SG" if pronoun in ["he", "she", "it"] else "PL"
+                    verb_agreement = "SG" if verb in ["sees", "walks"] else "PL"
+                    
+                    if pronoun_agreement != verb_agreement:
+                        return False, f"Disagreement: '{pronoun}' does not agree with '{verb}'"
+    
+    return True, "Sentence is grammatically correct"
+
+# Define the sentences to be checked
+sentences = [
+    "he sees the dog",
+    "they walk in the park",
+    "she walk in the park",  # Incorrect agreement
+    "it sees the telescope",
+    "they walks in the park"  # Incorrect agreement
+]
+
+# Check each sentence for agreement
+for sentence in sentences:
+    is_correct, message = check_agreement(sentence)
+    print(f"Sentence: '{sentence}' -> {message}")
