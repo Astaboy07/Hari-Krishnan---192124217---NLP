@@ -1,0 +1,29 @@
+#Question no 13
+
+!pip install nltk
+import nltk
+from nltk import CFG
+from nltk.parse.generate import generate
+
+# Define the context-free grammar
+cfg = CFG.fromstring("""
+    S -> NP VP
+    VP -> V NP | V NP PP
+    PP -> P NP
+    V -> "saw" | "ate" | "walked"
+    NP -> "John" | "Mary" | "Bob" | Det N | Det N PP
+    Det -> "a" | "an" | "the" | "my"
+    N -> "man" | "dog" | "cat" | "telescope" | "park"
+    P -> "in" | "on" | "by" | "with"
+""")
+
+# Define the sentence to be parsed
+sentence = "John saw the man in the park".split()
+
+# Create a parser
+parser = nltk.ChartParser(cfg)
+
+# Parse the sentence
+for tree in parser.parse(sentence):
+    print(tree)
+    tree.pretty_print()
