@@ -1,0 +1,105 @@
+class Item:
+    def __init__(self, symbol, start, dot, end):
+        self.symbol = symbol  # grammar symbol
+        self.start = start    # start position in sentence
+        self.dot = dot        # dot position in rule
+        self.end = end        # end position in sentence (predicted)
+
+    def __str__(self):
+        return f"{self.symbol} -> {'.'.join(str(x) for x in range(self.start, self.end))}"
+
+    def __eq__(self, other):
+        return (self.symbol, self.start, self.dot, self.end) == (other.symbol, other.start, other.dot, other.end)
+
+    def __hash__(self):
+        return hash((self.symbol, self.start, self.dot, self.end))
+
+
+def scanner(grammar, sentence):
+    """
+    Scans the sentence and generates terminals
+    """
+    for i, word in enumerate(sentence.split()):
+        if word in grammar["terminals"]:
+            yield Item(word, i, 1, i + 1)
+        else:
+            raise ValueError(f"Unexpected symbol: {word}")
+
+
+def predictor(chart, grammar, item, position):
+    """
+    Predictor step: Applies grammar rules to incomplete items
+    """
+    for rule in grammar["rules"].get(item.symbol, []):
+        new_item = Item(rule[0], position, 0, position)
+        if new_item not in chart[position]:
+            chart[position].append(new_item)
+
+
+def completer(chart, grammar, item, position):
+    """
+    Completer step: Completes items where the dot is at the end of the rule
+    """
+    for prev_item in chart[item.start]:
+        next_symbol = prev_item.symbol if prev_item.dot < len(grammar["rules"].get(prev_item.symbol, [])) else None
+        if next_symbol == item.symbol:
+            new_item = Item(prev_item.symbol, prev_item.start, prev_item.dot + 1, position)
+            if new_item not in chart[position]:
+                chart[position].append(new_item)
+
+
+def scanner_completer(chart, grammar, sentence):
+    """
+    Combined scanner and completer for the first iteration
+    """
+    for item in scanner(grammar, sentence):
+        chart[0].append(item)
+    for item in chart[0]:
+        completer(chart, grammar, item, 0)
+
+
+def earley_parser(grammar, sentence):
+    """
+    Earley parser implementation
+    """
+    chart = [[] for _ in range(len(sentence.split()) + 1)]
+    scanner_completer(chart, grammar, sentence)
+    for i in range(len(chart)):
+        for item in chart[i]:
+            if item.dot < len(grammar["rules"].get(item.symbol, [])):
+                next_symbol = grammar["rules"].get(item.symbol, [])[item.dot][0]
+                if next_symbol in grammar["nonterminals"]:
+                    predictor(chart, grammar, item, i)
+                elif next_symbol in grammar["terminals"]:
+                    scanner(chart, grammar, sentence)
+            else:
+                completer(chart, grammar, item, i)
+
+    # Check for successful parse (start symbol at end with completed dot)
+    for item in chart[-1]:
+        if item.symbol == grammar["start"] and item.dot == len(grammar["rules"].get(item.symbol, [])) and item.start == 0 and item.end == len(sentence.split()):
+            return True
+    return False
+
+
+# Example grammar
+grammar = {
+    "terminals": ["a", "big", "cat", "sleeps"],
+    "nonterminals": ["S", "VP", "NP", "AdjP"],
+    "rules": {
+        "S": [["NP", "VP"]],
+        "VP": [["sleeps"]],
+        "NP": [["a", "AdjP"], ["cat"]],
+        "AdjP": [["big", "cat"]],
+    },
+    "start": "S"
+}
+
+# Example sentence
+sentence = "a big cat sleeps"
+
+# Parse the sentence
+if earley_parser(grammar, sentence):
+    print("Sentence is valid according to the grammar")
+else:
+    print("Sentence is not valid according to the grammar")
