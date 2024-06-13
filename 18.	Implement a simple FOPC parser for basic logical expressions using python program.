@@ -1,0 +1,77 @@
+# Question no 18
+
+import re
+
+class Tokenizer:
+    def __init__(self, text):
+        self.tokens = re.findall(r'\w+|[()\[\],]', text)
+        self.position = 0
+
+    def next_token(self):
+        if self.position < len(self.tokens):
+            token = self.tokens[self.position]
+            self.position += 1
+            return token
+        else:
+            return None
+
+    def peek_token(self):
+        if self.position < len(self.tokens):
+            return self.tokens[self.position]
+        else:
+            return None
+
+class Parser:
+    def __init__(self, tokenizer):
+        self.tokenizer = tokenizer
+
+    def parse(self):
+        return self.parse_expression()
+
+    def parse_expression(self):
+        token = self.tokenizer.peek_token()
+
+        if token == '(':
+            self.tokenizer.next_token()  # Consume '('
+            expr = self.parse_expression()
+            if self.tokenizer.next_token() != ')':
+                raise SyntaxError("Expected ')'")
+            return expr
+        elif token == '[':
+            return self.parse_predicate()
+        else:
+            raise SyntaxError(f"Unexpected token: {token}")
+
+    def parse_predicate(self):
+        self.tokenizer.next_token()  # Consume '['
+        predicate_name = self.tokenizer.next_token()
+        args = []
+
+        while True:
+            token = self.tokenizer.peek_token()
+            if token == ']':
+                self.tokenizer.next_token()  # Consume ']'
+                break
+            elif token == ',':
+                self.tokenizer.next_token()  # Consume ','
+            else:
+                args.append(self.tokenizer.next_token())
+
+        return {'type': 'predicate', 'name': predicate_name, 'args': args}
+
+def parse_fopc_expression(text):
+    tokenizer = Tokenizer(text)
+    parser = Parser(tokenizer)
+    return parser.parse()
+
+if __name__ == "__main__":
+    expressions = [
+        "[Loves, John, Mary]",
+        "[Father, x, y]",
+        "[GreaterThan, 3, 2]"
+    ]
+
+    for expr in expressions:
+        print(f"Expression: {expr}")
+        parsed = parse_fopc_expression(expr)
+        print(f"Parsed: {parsed}\n")
