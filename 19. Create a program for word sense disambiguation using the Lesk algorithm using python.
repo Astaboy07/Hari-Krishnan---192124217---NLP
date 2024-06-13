@@ -1,0 +1,44 @@
+#Question no 19 
+
+# Install NLTK and download the WordNet data
+!pip install nltk
+import nltk
+nltk.download('wordnet')
+nltk.download('omw-1.4')
+nltk.download('punkt')
+nltk.download('stopwords')
+
+# Implement the Lesk Algorithm
+from nltk.corpus import wordnet as wn
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+import string
+
+def lesk(context_sentence, ambiguous_word):
+    context = set(word_tokenize(context_sentence))
+    context = context.difference(stopwords.words('english')).difference(string.punctuation)
+
+    best_sense = None
+    max_overlap = 0
+    
+    for sense in wn.synsets(ambiguous_word):
+        signature = set(word_tokenize(sense.definition()))
+        signature = signature.difference(stopwords.words('english')).difference(string.punctuation)
+        
+        overlap = len(context.intersection(signature))
+        
+        if overlap > max_overlap:
+            max_overlap = overlap
+            best_sense = sense
+            
+    return best_sense
+
+# Example usage
+sentence = "I went to the bank to deposit money"
+ambiguous_word = "bank"
+sense = lesk(sentence, ambiguous_word)
+
+print(f"Context sentence: {sentence}")
+print(f"Ambiguous word: {ambiguous_word}")
+print(f"Identified sense: {sense}")
+print(f"Sense definition: {sense.definition()}")
