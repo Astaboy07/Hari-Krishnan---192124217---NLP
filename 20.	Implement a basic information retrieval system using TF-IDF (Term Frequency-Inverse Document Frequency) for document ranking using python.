@@ -1,0 +1,62 @@
+#Question no 20
+
+import nltk
+from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+
+nltk.download('punkt')
+nltk.download('stopwords')
+
+# Example documents
+documents = [
+    "The quick brown fox jumps over the lazy dog.",
+    "Never jump over the lazy dog quickly.",
+    "Brown foxes are quick and jump over lazy dogs in summer."
+]
+
+# Preprocessing function
+def preprocess(text):
+    tokens = nltk.word_tokenize(text.lower())
+    tokens = [word for word in tokens if word.isalnum()]
+    tokens = [word for word in tokens if word not in stopwords.words('english')]
+    return ' '.join(tokens)
+
+# Preprocess documents
+processed_docs = [preprocess(doc) for doc in documents]
+print("Processed documents:")
+print(processed_docs)
+
+# Initialize TF-IDF Vectorizer
+vectorizer = TfidfVectorizer()
+tfidf_matrix = vectorizer.fit_transform(processed_docs)
+
+# Show TF-IDF matrix
+print("\nTF-IDF Matrix:")
+print(tfidf_matrix.toarray())
+print("\nFeature names:")
+print(vectorizer.get_feature_names_out())
+
+# Example query
+query = "quick brown fox"
+
+# Preprocess query
+processed_query = preprocess(query)
+print(f"\nProcessed query: {processed_query}")
+
+# Transform query using the same vectorizer
+query_vec = vectorizer.transform([processed_query])
+
+# Calculate cosine similarity between query and each document
+cosine_similarities = cosine_similarity(query_vec, tfidf_matrix).flatten()
+print(f"\nCosine similarities: {cosine_similarities}")
+
+# Rank documents
+ranked_doc_indices = cosine_similarities.argsort()[::-1]
+print(f"\nRanked document indices: {ranked_doc_indices}")
+
+# Display ranked documents
+print("\nRanked documents:")
+for idx in ranked_doc_indices:
+    print(f"Document {idx+1}: {documents[idx]} (Score: {cosine_similarities[idx]})")
