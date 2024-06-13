@@ -1,0 +1,53 @@
+#Question no 17
+
+# Install NLTK and download the WordNet data
+!pip install nltk
+import nltk
+nltk.download('wordnet')
+nltk.download('omw-1.4')
+
+# Access WordNet and explore word meanings
+from nltk.corpus import wordnet as wn
+
+def explore_word(word):
+    # Get synsets for the word
+    synsets = wn.synsets(word)
+    
+    print(f"Synsets and Definitions for '{word}':\n")
+    for synset in synsets:
+        print(f"Synset: {synset.name()}")
+        print(f"Definition: {synset.definition()}")
+        print(f"Examples: {synset.examples()}\n")
+    
+    # Explore the first synset
+    if synsets:
+        first_synset = synsets[0]
+        print(f"Exploring Synset: {first_synset.name()}\n")
+        
+        # Get hypernyms
+        hypernyms = first_synset.hypernyms()
+        print("Hypernyms:")
+        for hypernym in hypernyms:
+            print(f"- {hypernym.name()}: {hypernym.definition()}")
+        
+        # Get hyponyms
+        hyponyms = first_synset.hyponyms()
+        print("\nHyponyms:")
+        for hyponym in hyponyms:
+            print(f"- {hyponym.name()}: {hyponym.definition()}")
+        
+        # Get meronyms
+        meronyms = first_synset.part_meronyms()
+        print("\nMeronyms:")
+        for meronym in meronyms:
+            print(f"- {meronym.name()}: {meronym.definition()}")
+        
+        # Get holonyms
+        holonyms = first_synset.part_holonyms()
+        print("\nHolonyms:")
+        for holonym in holonyms:
+            print(f"- {holonym.name()}: {holonym.definition()}")
+
+# Example usage
+word = "car"
+explore_word(word)
